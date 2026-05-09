@@ -1,0 +1,45 @@
+services:
+  # Servidor Tomcat com a aplicação Java
+  tomcat:
+    build: .
+    container_name: tomcat-app-fitness
+    ports:
+      - "8080:8080"
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # Banco de dados MySQL
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db-fitness
+    environment:
+      MYSQL_ROOT_PASSWORD: teste
+      MYSQL_DATABASE: desafio-fitness
+      MYSQL_USER: teste
+      MYSQL_PASSWORD: teste
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Painel admin do MySQL no navegador
+  phpmyadmin:
+    image: phpmyadmin:latest
+    container_name: phpmyadmin-fitness
+    environment:
+      PMA_HOST: mysql
+      PMA_USER: teste
+      PMA_PASSWORD: teste
+    ports:
+      - "8081:80"
+    depends_on:
+      - mysql
+
+volumes:
+  mysql-data:
