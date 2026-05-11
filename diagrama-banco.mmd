@@ -1,0 +1,41 @@
+erDiagram
+    USUARIO {
+        int usuario PK
+        string nome
+        string email
+        string senha
+        date data_nascimento
+        float peso
+        float altura
+        datetime data_cadastro
+    }
+
+    FICHA_TREINO {
+        int ficha PK
+        int usuario FK
+        string nome_ficha
+        string objetivo
+        datetime data_criacao
+    }
+
+    EXERCICIO {
+        int exercicio PK
+        string nome
+        string descricao
+        string grupo_muscular
+        string equipamento
+    }
+
+    FICHA_EXERCICIO {
+        int ficha_exercicio PK
+        int ficha FK
+        int exercicio FK
+        int series
+        int repeticoes
+        float carga_kg
+        int tempo_descanso_seg
+        int ordem
+        string observacoes
+    }
+
+    USUARIO ||--o{ FICHA_EXERCICIO : contains
