@@ -6,6 +6,10 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
+/**
+ * Singleton para gerenciar conexão MySQL.
+ * Responsável por: criar/reutilizar conexão, preparar statements e executar queries.
+ */
 public class MySqlSingleton {
     private static final String URL = "jdbc:mysql://mysql:3306/desafio-fitness";
     private static final String USER = "teste";
@@ -36,19 +40,21 @@ public class MySqlSingleton {
         return this.conexao;
     }
 
-    public ResultSet executar(String sql, Object... parametros) throws SQLException {
-        PreparedStatement ps = this.obterConexao().prepareStatement(sql);
+    private void vincularParametros(PreparedStatement ps, Object... parametros) throws SQLException {
         for (int i = 0; i < parametros.length; i++) {
             ps.setObject(i + 1, parametros[i]);
         }
+    }
+
+    public ResultSet executarConsulta(String sql, Object... parametros) throws SQLException {
+        PreparedStatement ps = this.obterConexao().prepareStatement(sql);
+        this.vincularParametros(ps, parametros);
         return ps.executeQuery();
     }
 
     public int executarUpdate(String sql, Object... parametros) throws SQLException {
         try (PreparedStatement ps = this.obterConexao().prepareStatement(sql)) {
-            for (int i = 0; i < parametros.length; i++) {
-                ps.setObject(i + 1, parametros[i]);
-            }
+            this.vincularParametros(ps, parametros);
             return ps.executeUpdate();
         }
     }
