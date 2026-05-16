@@ -11,7 +11,7 @@
     <h1>Usuários</h1>
 
     <h2>Cadastrar</h2>
-    <form action="${pageContext.request.contextPath}/usuarios" method="post">
+    <form action="<%= request.getContextPath() %>/usuarios" method="post">
         <input type="hidden" name="acao" value="inserir">
         <label>Nome: <input type="text" name="nome" required></label>
         <label>E-mail: <input type="email" name="email" required></label>
@@ -38,7 +38,7 @@
                 <td><%= u.getNome() %></td>
                 <td><%= u.getEmail() %></td>
                 <td>
-                    <form action="${pageContext.request.contextPath}/usuarios" method="post" style="display:inline">
+                    <form action="<%= request.getContextPath() %>/usuarios" method="post" style="display:inline">
                         <input type="hidden" name="acao" value="excluir">
                         <input type="hidden" name="usuario" value="<%= u.getUsuario() %>">
                         <button type="submit">Excluir</button>
