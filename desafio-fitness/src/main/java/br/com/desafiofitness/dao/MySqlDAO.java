@@ -16,6 +16,10 @@ public abstract class MySqlDAO {
         return MySqlSingleton.getInstance().executarUpdate(sql, parametros);
     }
 
+    protected int executarUpdateRetornandoChave(String sql, Object... parametros) throws SQLException {
+        return MySqlSingleton.getInstance().executarUpdateRetornandoChave(sql, parametros);
+    }
+
     protected <T extends Mapeavel> T mapearSimples(ResultSet rs, Class<T> classe) {
         try {
             T objeto = classe.getDeclaredConstructor().newInstance();

@@ -5,6 +5,7 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.sql.Statement;
 
 /**
  * Singleton para gerenciar conexão MySQL.
@@ -56,6 +57,19 @@ public class MySqlSingleton {
         try (PreparedStatement ps = this.obterConexao().prepareStatement(sql)) {
             this.vincularParametros(ps, parametros);
             return ps.executeUpdate();
+        }
+    }
+
+    public int executarUpdateRetornandoChave(String sql, Object... parametros) throws SQLException {
+        try (PreparedStatement ps = this.obterConexao().prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+            this.vincularParametros(ps, parametros);
+            ps.executeUpdate();
+            try (ResultSet rs = ps.getGeneratedKeys()) {
+                if (rs.next()) {
+                    return rs.getInt(1);
+                }
+                throw new SQLException("Nenhuma chave gerada.");
+            }
         }
     }
 }
