@@ -1,12 +1,15 @@
 -- ============================================================
 -- Plataforma Fitness - Schema MySQL
 -- ============================================================
-
-CREATE DATABASE IF NOT EXISTS desafio_fitness
-    CHARACTER SET utf8mb4
-    COLLATE utf8mb4_unicode_ci;
-
-USE desafio_fitness;
+SET FOREIGN_KEY_CHECKS = 0;
+DROP TABLE IF EXISTS PROGRESSO_DESAFIOS;
+DROP TABLE IF EXISTS DESAFIOS_EXERCICIOS;
+DROP TABLE IF EXISTS DESAFIOS;
+DROP TABLE IF EXISTS FICHAS_EXERCICIO;
+DROP TABLE IF EXISTS FICHAS_TREINO;
+DROP TABLE IF EXISTS EXERCICIOS;
+DROP TABLE IF EXISTS USUARIOS;
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- ------------------------------------------------------------
 -- Tabela: USUARIOS
@@ -15,16 +18,9 @@ CREATE TABLE USUARIOS (
     usuario         INT             NOT NULL AUTO_INCREMENT,
     nome            VARCHAR(100)    NOT NULL,
     email           VARCHAR(150)    NOT NULL,
-    senha           VARCHAR(255)    NOT NULL,
-    data_nascimento DATE            NULL,
-    peso            DECIMAL(5,2)    NULL,
-    altura          DECIMAL(4,2)    NULL,
-    data_cadastro   DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT pk_usuarios_usuario        PRIMARY KEY (usuario),
-    CONSTRAINT uq_usuarios_email          UNIQUE      (email),
-    CONSTRAINT chk_usuarios_peso          CHECK       (peso > 0),
-    CONSTRAINT chk_usuarios_altura        CHECK       (altura > 0)
+    CONSTRAINT uq_usuarios_email          UNIQUE      (email)
 );
 
 -- ------------------------------------------------------------
@@ -34,56 +30,59 @@ CREATE TABLE EXERCICIOS (
     exercicio       INT             NOT NULL AUTO_INCREMENT,
     nome            VARCHAR(100)    NOT NULL,
     descricao       TEXT            NULL,
-    grupo_muscular  VARCHAR(50)     NULL,
-    equipamento     VARCHAR(100)    NULL,
 
-    CONSTRAINT pk_exercicios_exercicio    PRIMARY KEY (exercicio),
-    CONSTRAINT uq_exercicio_nome            UNIQUE      (nome)
+    CONSTRAINT pk_exercicios_exercicio    PRIMARY KEY (exercicio)
 );
 
 -- ------------------------------------------------------------
--- Tabela: FICHA_TREINO
+-- Tabela: DESAFIOS
 -- ------------------------------------------------------------
-CREATE TABLE FICHAS_TREINO (
-    ficha        INT             NOT NULL AUTO_INCREMENT,
-    usuario      INT             NOT NULL,
-    nome_ficha      VARCHAR(100)    NOT NULL,
-    objetivo        VARCHAR(255)    NULL,
-    data_criacao    DATETIME        NOT NULL DEFAULT CURRENT_TIMESTAMP,
+CREATE TABLE DESAFIOS (
+    desafio         INT             NOT NULL AUTO_INCREMENT,
+    nome            VARCHAR(100)    NOT NULL,
+    descricao       TEXT            NULL,
 
-    CONSTRAINT pk_fichastreino_ficha          PRIMARY KEY (ficha),
-    CONSTRAINT fk_fichastreino_usuario        FOREIGN KEY (usuario)
-        REFERENCES USUARIOS (usuario)
+    CONSTRAINT pk_desafios_desafio PRIMARY KEY (desafio)
+);
+
+-- ------------------------------------------------------------
+-- Tabela: DESAFIOS_EXERCICIOS
+-- ------------------------------------------------------------
+CREATE TABLE DESAFIOS_EXERCICIOS (
+    desafio         INT             NOT NULL,
+    exercicio       INT             NOT NULL,
+
+    CONSTRAINT pk_desafios_exercicios PRIMARY KEY (desafio, exercicio),
+    CONSTRAINT fk_desafios_exercicios_desafio FOREIGN KEY (desafio)
+        REFERENCES DESAFIOS (desafio)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE,
+    CONSTRAINT fk_desafios_exercicios_exercicio FOREIGN KEY (exercicio)
+        REFERENCES EXERCICIOS (exercicio)
         ON DELETE CASCADE
         ON UPDATE CASCADE
 );
 
 -- ------------------------------------------------------------
--- Tabela: FICHA_EXERCICIO
+-- Tabela: PROGRESSO_DESAFIOS
 -- ------------------------------------------------------------
-CREATE TABLE FICHAS_EXERCICIO (
-    ficha_exercicio  INT             NOT NULL AUTO_INCREMENT,
-    ficha               INT             NOT NULL,
-    exercicio           INT             NOT NULL,
-    series              INT             NOT NULL,
-    repeticoes          INT             NOT NULL,
-    carga_kg            DECIMAL(5,2)    NULL,
-    tempo_descanso_seg  INT             NULL,
-    ordem               INT             NOT NULL DEFAULT 1,
-    observacoes         TEXT            NULL,
+CREATE TABLE PROGRESSO_DESAFIOS (
+    usuario         INT             NOT NULL,
+    desafio         INT             NOT NULL,
+    exercicio       INT             NOT NULL,
+    concluido       BOOLEAN         NOT NULL DEFAULT FALSE,
 
-    CONSTRAINT pk_fichasexercicio_ficha_exercicio PRIMARY KEY (ficha_exercicio),
-    CONSTRAINT fk_fichasexercicio_ficha           FOREIGN KEY (ficha)
-        REFERENCES FICHAS_TREINO (ficha)
+    CONSTRAINT pk_progresso_desafios PRIMARY KEY (usuario, desafio, exercicio),
+    CONSTRAINT fk_progresso_desafios_usuario FOREIGN KEY (usuario)
+        REFERENCES USUARIOS (usuario)
         ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT fk_fichasexercicio_exercicio       FOREIGN KEY (exercicio)
-        REFERENCES EXERCICIOS (exercicio)
-        ON DELETE RESTRICT
+    CONSTRAINT fk_progresso_desafios_desafio FOREIGN KEY (desafio)
+        REFERENCES DESAFIOS (desafio)
+        ON DELETE CASCADE
         ON UPDATE CASCADE,
-    CONSTRAINT chk_fichasexercicio_series            CHECK (series > 0),
-    CONSTRAINT chk_fichasexercicio_repeticoes        CHECK (repeticoes > 0),
-    CONSTRAINT chk_fichasexercicio_carga_kg          CHECK (carga_kg >= 0),
-    CONSTRAINT chk_fichasexercicio_tempo_descanso_seg CHECK (tempo_descanso_seg >= 0),
-    CONSTRAINT chk_fichasexercicio_ordem             CHECK (ordem > 0)
+    CONSTRAINT fk_progresso_desafios_desafio_exercicio FOREIGN KEY (desafio, exercicio)
+        REFERENCES DESAFIOS_EXERCICIOS (desafio, exercicio)
+        ON DELETE CASCADE
+        ON UPDATE CASCADE
 );

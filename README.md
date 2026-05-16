@@ -26,6 +26,11 @@ docker compose up -d --build
 
 ## MySQL
 
+Reseta/Cria Schema no Banco
+```bash
+docker exec -i mysql-db-fitness mysql -uteste -pteste desafio-fitness < schema.sql
+```
+
 | Campo        | Valor     |
 |------------- |-----------|
 | Host         | localhost |
