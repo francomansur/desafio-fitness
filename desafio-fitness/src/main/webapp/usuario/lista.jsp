@@ -12,21 +12,25 @@
 <div class="container py-4">
 
     <h1 class="mb-4">Usuários</h1>
+    <a href="<%= request.getContextPath() %>/progresso" class="btn btn-outline-secondary mb-4">Voltar</a>
 
     <% if (request.getAttribute("erro") != null) { %>
     <div class="alert alert-danger"><%= request.getAttribute("erro") %></div>
     <% } %>
 
     <div class="card mb-4">
-        <div class="card-header">Cadastrar</div>
+        <div class="card-header">
+            <span id="cardTitle">Cadastrar</span>
+        </div>
         <div class="card-body">
-            <form action="<%= request.getContextPath() %>/usuarios" method="post" class="row g-3">
-                <input type="hidden" name="acao" value="inserir">
+            <form action="<%= request.getContextPath() %>/usuarios" method="post" class="row g-3" id="formulario">
+                <input type="hidden" name="acao" value="inserir" id="acao">
+                <input type="hidden" name="usuario" id="usuarioId">
                 <div class="col-md-5">
-                    <input type="text" name="nome" class="form-control" placeholder="Nome" required>
+                    <input type="text" name="nome" class="form-control" placeholder="Nome" required id="nome">
                 </div>
                 <div class="col-md-5">
-                    <input type="email" name="email" class="form-control" placeholder="E-mail" required>
+                    <input type="email" name="email" class="form-control" placeholder="E-mail" required id="email">
                 </div>
                 <div class="col-md-2">
                     <button type="submit" class="btn btn-primary w-100">Salvar</button>
@@ -49,12 +53,13 @@
                 List<Usuario> usuarios = (List<Usuario>) request.getAttribute("usuarios");
                 for (Usuario u : usuarios) {
             %>
-            <tr>
+            <tr data-id="<%= u.getUsuario() %>" data-nome="<%= u.getNome() %>" data-email="<%= u.getEmail() %>">
                 <td><%= u.getUsuario() %></td>
                 <td><%= u.getNome() %></td>
                 <td><%= u.getEmail() %></td>
                 <td>
-                    <form action="<%= request.getContextPath() %>/usuarios" method="post">
+                    <button type="button" class="btn btn-warning btn-sm" onclick="editarUsuario(this)">Editar</button>
+                    <form action="<%= request.getContextPath() %>/usuarios" method="post" class="d-inline">
                         <input type="hidden" name="acao" value="excluir">
                         <input type="hidden" name="usuario" value="<%= u.getUsuario() %>">
                         <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -66,5 +71,16 @@
     </table>
 
 </div>
+<script>
+    function editarUsuario(botao) {
+        const tr = botao.closest('tr');
+        document.getElementById('cardTitle').innerText = 'Editar';
+        document.getElementById('acao').value = 'atualizar';
+        document.getElementById('usuarioId').value = tr.dataset.id;
+        document.getElementById('nome').value = tr.dataset.nome;
+        document.getElementById('email').value = tr.dataset.email;
+        document.getElementById('formulario').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
 </body>
 </html>

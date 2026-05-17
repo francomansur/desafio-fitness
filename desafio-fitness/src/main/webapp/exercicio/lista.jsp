@@ -24,17 +24,21 @@
 <div class="container py-4">
 
     <h1 class="mb-4">Exercícios</h1>
+    <a href="<%= request.getContextPath() %>/progresso" class="btn btn-outline-secondary mb-4">Voltar</a>
 
     <div class="card mb-4">
-        <div class="card-header">Cadastrar</div>
+        <div class="card-header">
+            <span id="cardTitle">Cadastrar</span>
+        </div>
         <div class="card-body">
-            <form action="<%= request.getContextPath() %>/exercicios" method="post" class="row g-3">
-                <input type="hidden" name="acao" value="inserir">
+            <form action="<%= request.getContextPath() %>/exercicios" method="post" class="row g-3" id="formulario">
+                <input type="hidden" name="acao" value="inserir" id="acao">
+                <input type="hidden" name="codigoExercicio" id="codigoExercicio">
                 <div class="col-12">
-                    <input type="text" name="nome" class="form-control" placeholder="Nome" required>
+                    <input type="text" name="nome" class="form-control" placeholder="Nome" required id="nome">
                 </div>
                 <div class="col-12">
-                    <textarea name="descricao" class="form-control" placeholder="Descrição" rows="4" required></textarea>
+                    <textarea name="descricao" class="form-control" placeholder="Descrição" rows="4" required id="descricao"></textarea>
                 </div>
                 <div class="col-12">
                     <button type="submit" class="btn btn-primary">Salvar</button>
@@ -63,12 +67,13 @@
                 List<Exercicio> exercicios = (List<Exercicio>) request.getAttribute("exercicios");
                 for (Exercicio e : exercicios) {
             %>
-            <tr>
+            <tr data-id="<%= e.getExercicio() %>" data-nome="<%= e.getNome() %>" data-descricao="<%= e.getDescricao() %>">
                 <td><%= e.getExercicio() %></td>
                 <td><%= e.getNome() %></td>
                 <td class="descricao-cell"><%= e.getDescricao() %></td>
                 <td>
-                    <form action="<%= request.getContextPath() %>/exercicios" method="post">
+                    <button type="button" class="btn btn-warning btn-sm" onclick="editarExercicio(this)">Editar</button>
+                    <form action="<%= request.getContextPath() %>/exercicios" method="post" class="d-inline">
                         <input type="hidden" name="acao" value="excluir">
                         <input type="hidden" name="codigoExercicio" value="<%= e.getExercicio() %>">
                         <button type="submit" class="btn btn-danger btn-sm">Excluir</button>
@@ -80,5 +85,16 @@
     </table>
 
 </div>
+<script>
+    function editarExercicio(botao) {
+        const tr = botao.closest('tr');
+        document.getElementById('cardTitle').innerText = 'Editar';
+        document.getElementById('acao').value = 'atualizar';
+        document.getElementById('codigoExercicio').value = tr.dataset.id;
+        document.getElementById('nome').value = tr.dataset.nome;
+        document.getElementById('descricao').value = tr.dataset.descricao;
+        document.getElementById('formulario').scrollIntoView({ behavior: 'smooth' });
+    }
+</script>
 </body>
 </html>

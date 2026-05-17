@@ -10,6 +10,68 @@ import java.util.List;
 
 public class DesafioDAO extends MySqlDAO {
 
+    public void sincronizarProgressoUsuariosDesafios() {
+        try {
+            this.executarUpdate("""
+                INSERT INTO PROGRESSO_DESAFIOS (usuario, desafio, exercicio, concluido) 
+                SELECT u.usuario, de.desafio, de.exercicio, FALSE 
+                FROM USUARIOS u 
+                INNER JOIN DESAFIOS_EXERCICIOS de ON 1 = 1 
+                LEFT JOIN PROGRESSO_DESAFIOS pd ON pd.usuario = u.usuario 
+                AND pd.desafio = de.desafio AND pd.exercicio = de.exercicio 
+                WHERE pd.usuario IS NULL
+                """);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao sincronizar progresso dos usuários.", e);
+        }
+    }
+
+    public boolean exercicioConcluidoPorUsuario(int codigoUsuario, int codigoDesafio, int codigoExercicio) {
+        try {
+            ResultSet rs = this.executarConsulta(
+                "SELECT concluido FROM PROGRESSO_DESAFIOS WHERE usuario = ? AND desafio = ? AND exercicio = ?",
+                codigoUsuario,
+                codigoDesafio,
+                codigoExercicio);
+            if (rs.next()) {
+                return rs.getBoolean("concluido");
+            }
+            return false;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao consultar conclusão do exercício.", e);
+        }
+    }
+
+    public int contarExerciciosConcluidosPorUsuarioNoDesafio(int codigoUsuario, int codigoDesafio) {
+        try {
+            ResultSet rs = this.executarConsulta(
+                "SELECT COUNT(*) AS total FROM PROGRESSO_DESAFIOS WHERE usuario = ? AND desafio = ? AND concluido = TRUE",
+                codigoUsuario,
+                codigoDesafio);
+            if (rs.next()) {
+                return rs.getInt("total");
+            }
+            return 0;
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao contar exercícios concluídos do desafio.", e);
+        }
+    }
+
+    public void atualizarProgressoExercicioUsuario(int codigoUsuario, int codigoDesafio, int codigoExercicio, boolean concluido) {
+        try {
+            this.executarUpdate("""
+                INSERT INTO PROGRESSO_DESAFIOS (usuario, desafio, exercicio, concluido) VALUES (?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE concluido = VALUES(concluido)
+                """,
+                codigoUsuario,
+                codigoDesafio,
+                codigoExercicio,
+                concluido);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao atualizar progresso do exercício.", e);
+        }
+    }
+
     public List<Desafio> listarTodosDesafios() {
         try {
             ResultSet rs = this.executarConsulta("SELECT * FROM DESAFIOS ORDER BY DESAFIO");
