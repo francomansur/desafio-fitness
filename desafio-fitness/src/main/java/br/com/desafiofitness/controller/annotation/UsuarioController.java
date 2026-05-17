@@ -34,7 +34,15 @@ public class UsuarioController extends HttpServlet {
         if ("inserir".equals(acao)) {
             String nome = request.getParameter("nome");
             String email = request.getParameter("email");
-            this.usuarioService.inserirUsuario(nome, email);
+            try {
+                this.usuarioService.inserirUsuario(nome, email);
+            } catch (RuntimeException e) {
+                List<Usuario> usuarios = this.usuarioService.listarTodosUsuarios();
+                request.setAttribute("usuarios", usuarios);
+                request.setAttribute("erro", "Nao foi possivel criar o usuario. O email já está sendo usado.");
+                request.getRequestDispatcher("/usuario/lista.jsp").forward(request, response);
+                return;
+            }
 
         } else if ("atualizar".equals(acao)) {
             int codigoUsuario = Integer.parseInt(request.getParameter("usuario"));

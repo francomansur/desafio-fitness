@@ -13,6 +13,10 @@
 
     <h1 class="mb-4">Usuários</h1>
 
+    <% if (request.getAttribute("erro") != null) { %>
+    <div class="alert alert-danger"><%= request.getAttribute("erro") %></div>
+    <% } %>
+
     <div class="card mb-4">
         <div class="card-header">Cadastrar</div>
         <div class="card-body">
