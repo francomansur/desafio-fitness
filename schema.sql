@@ -18,6 +18,7 @@ CREATE TABLE USUARIOS (
     usuario         INT             NOT NULL AUTO_INCREMENT,
     nome            VARCHAR(100)    NOT NULL,
     email           VARCHAR(150)    NOT NULL,
+    senha           VARCHAR(255)    NOT NULL,
 
     CONSTRAINT pk_usuarios_usuario        PRIMARY KEY (usuario),
     CONSTRAINT uq_usuarios_email          UNIQUE      (email)

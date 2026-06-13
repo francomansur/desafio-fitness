@@ -34,11 +34,23 @@ public class UsuarioDAO extends MySqlDAO {
         }
     }
 
-    public void inserirUsuario(String nome, String email) {
+    public void inserirUsuario(String nome, String email, String senha) {
         try {
-            this.executarUpdate("INSERT INTO USUARIOS (nome, email) VALUES (?, ?)", nome, email);
+            this.executarUpdate("INSERT INTO USUARIOS (nome, email, senha) VALUES (?, ?, ?)", nome, email, senha);
         } catch (SQLException e) {
             throw new RuntimeException("Erro ao inserir usuário.", e);
+        }
+    }
+
+    public Usuario buscarUsuarioPorEmail(String email) {
+        try {
+            ResultSet rs = this.executarConsulta("SELECT * FROM USUARIOS WHERE email = ?", email);
+            if (!rs.next()) {
+                return null;
+            }
+            return this.mapearSimples(rs, Usuario.class);
+        } catch (SQLException e) {
+            throw new RuntimeException("Erro ao buscar usuário por email.", e);
         }
     }
 

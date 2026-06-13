@@ -17,6 +17,16 @@ public class DesafioService {
         return this.desafioDAO.listarTodosDesafios();
     }
 
+    public Desafio buscarDesafioPorId(int codigoDesafio) {
+        if (codigoDesafio <= 0) {
+            return null;
+        }
+        return this.listarTodosDesafios().stream()
+                .filter(d -> d.getDesafio() == codigoDesafio)
+                .findFirst()
+                .orElse(null);
+    }
+
     public void sincronizarProgressoUsuariosDesafios() {
         this.desafioDAO.sincronizarProgressoUsuariosDesafios();
     }
