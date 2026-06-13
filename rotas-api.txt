@@ -1,0 +1,192 @@
+================================================================================
+DOCUMENTACAO DA API REST - DESAFIO FITNESS
+================================================================================
+
+Este documento descreve as rotas, metodos HTTP, corpos de requisicao (payloads)
+e comportamentos da API RESTful do Desafio Fitness.
+
+Configuracao Geral:
+- URL Base: http://localhost:8080/desafio-fitness
+- Headers para envio de JSON: Content-Type: application/json
+- Autenticacao JWT: Nas rotas protegidas (com prefixo /api/), inclua o header:
+  Authorization: Bearer <SEU_TOKEN_AQUI>
+
+--------------------------------------------------------------------------------
+1. ROTAS PUBLICAS (Nao exigem token)
+--------------------------------------------------------------------------------
+
+[POST] /api/usuarios
+Descricao: Cadastro/registro de um novo usuario no sistema.
+Body esperado (JSON):
+{
+  "nome": "Nome do Usuario",
+  "email": "usuario@email.com",
+  "senha": "senhaSegura123"
+}
+Respostas comuns:
+- 201 Created: {"success": true, "message": "Usuario criado com sucesso."}
+- 400 Bad Request: {"success": false, "error": "Mensagem detalhada do erro."}
+
+
+[POST] /auth/login
+Descricao: Autenticacao de usuario. Valida credenciais e emite o token JWT.
+Body esperado (JSON):
+{
+  "email": "usuario@email.com",
+  "senha": "senhaSegura123"
+}
+Respostas comuns:
+- 200 OK: Contem a chave "token" com a string do JWT e dados do usuario:
+  {
+    "success": true,
+    "token": "eyJhbGciOiJIUzI...",
+    "usuario": {
+      "usuario": 1,
+      "nome": "Nome do Usuario",
+      "email": "usuario@email.com"
+    }
+  }
+- 401 Unauthorized: {"success": false, "error": "Email ou senha incorretos."}
+- 400 Bad Request: {"success": false, "error": "Corpo da requisicao invalido ou vazio."}
+
+--------------------------------------------------------------------------------
+2. ROTAS PROTEGIDAS (Exigem Header: Authorization: Bearer <token>)
+--------------------------------------------------------------------------------
+
+=== USUARIOS ===
+
+[GET] /api/usuarios
+Descricao: Retorna a lista de todos os usuarios cadastrados.
+Resposta comum:
+- 200 OK: Array de objetos com dados dos usuarios.
+
+
+[GET] /api/usuarios/{id}
+Descricao: Busca um usuario especifico pelo ID.
+Exemplo: /api/usuarios/1
+Resposta comum:
+- 200 OK: Dados do usuario solicitado.
+- 404 Not Found: {"success": false, "error": "Usuario nao encontrado."}
+
+
+[PUT] /api/usuarios/{id}
+Descricao: Atualiza nome e/ou email do usuario especificado pelo ID.
+Exemplo: /api/usuarios/1
+Body esperado (JSON):
+{
+  "nome": "Nome Atualizado",
+  "email": "novoemail@email.com"
+}
+Respostas comuns:
+- 200 OK: {"success": true, "message": "Usuario atualizado com sucesso."}
+- 400 Bad Request: {"success": false, "error": "Mensagem do erro."}
+
+
+[DELETE] /api/usuarios/{id}
+Descricao: Remove o usuario especificado pelo ID.
+Exemplo: /api/usuarios/1
+Resposta comum:
+- 200 OK: {"success": true, "message": "Usuario excluido com sucesso."}
+
+
+=== EXERCICIOS ===
+
+[POST] /api/exercicios
+Descricao: Cadastra um novo exercicio de treino.
+Body esperado (JSON):
+{
+  "nome": "Agachamento",
+  "descricao": "Agachamento livre com barra"
+}
+Resposta comum:
+- 201 Created: {"success": true, "message": "Exercicio criado com sucesso."}
+
+
+[GET] /api/exercicios
+Descricao: Lista todos os exercicios cadastrados.
+Resposta comum:
+- 200 OK: Array JSON contendo todos os exercicios.
+
+
+[DELETE] /api/exercicios/{id}
+Descricao: Exclui um exercicio cadastrado pelo ID.
+Exemplo: /api/exercicios/1
+Resposta comum:
+- 200 OK: {"success": true, "message": "Exercicio excluido com sucesso."}
+
+
+=== DESAFIOS ===
+
+[POST] /api/desafios
+Descricao: Cria um novo desafio, permitindo associar exercicios no ato da criacao.
+Body esperado (JSON):
+{
+  "nome": "Desafio de Pernas",
+  "descricao": "Foco em membros inferiores",
+  "exercicios": [1, 2]  // Array opcional com os IDs dos exercicios
+}
+Resposta comum:
+- 201 Created: {"success": true, "message": "Desafio criado com sucesso."}
+
+
+[GET] /api/desafios
+Descricao: Lista todos os desafios e traz seus exercicios aninhados.
+Resposta comum:
+- 200 OK: Array de desafios com exercicios internos.
+
+
+[POST] /api/desafios/{id}/exercicios
+Descricao: Associa um exercicio ja existente ao desafio especificado.
+Exemplo: /api/desafios/1/exercicios
+Body esperado (JSON):
+{
+  "exercicio": 2  // ID do exercicio a ser adicionado
+}
+Resposta comum:
+- 200 OK: {"success": true, "message": "Exercicio adicionado ao desafio com sucesso."}
+
+
+[DELETE] /api/desafios/{desafioId}/exercicios/{exercicioId}
+Descricao: Desassocia um exercicio de um desafio.
+Exemplo: /api/desafios/1/exercicios/2
+Resposta comum:
+- 200 OK: {"success": true, "message": "Exercicio removido do desafio com sucesso."}
+
+
+[DELETE] /api/desafios/{id}
+Descricao: Exclui um desafio.
+Exemplo: /api/desafios/1
+Resposta comum:
+- 200 OK: {"success": true, "message": "Desafio excluido com sucesso."}
+
+
+=== PROGRESSO ===
+
+[GET] /api/progresso
+Descricao: Obtem o progresso detalhado de cada desafio do usuario logado (lido do JWT).
+Resposta comum (JSON):
+{
+  "usuarioSelecionado": 1,
+  "desafios": [ ... ],
+  "exerciciosConcluidos": {
+    "1-1": true,  // {idDesafio}-{idExercicio}
+    "1-2": false
+  },
+  "progressoPorDesafio": {
+    "1": 1  // ID do desafio -> Quantidade de exercicios concluidos
+  },
+  "usuarios": [ ... ]
+}
+
+
+[POST] /api/progresso
+Descricao: Marca ou desmarca a conclusao de um exercicio de um desafio para o usuario logado.
+Body esperado (JSON):
+{
+  "desafio": 1,
+  "exercicio": 1,
+  "concluido": true  // use false para desmarcar
+}
+Resposta comum:
+- 200 OK: {"success": true, "message": "Progresso atualizado com sucesso."}
+================================================================================
